@@ -1,12 +1,15 @@
 #version 330 core
 
+uniform float near;
+uniform float far;
+uniform bool mode;
 in float z;
 out vec3 color;
 
 void main() {
-   float z1 = 2 * gl_FragCoord.z - 1;
-   // I don't quite get why results are different
-   /*float c = (-z + 1) / 2;*/
-   float c = (-z1 + 1) / 2; // which = -gl_FragCoord.z
+   float c1 = clamp((z - near) / (far - near), 0, 1);
+   float c2 = clamp(((2 * gl_FragCoord.z - 1) - gl_DepthRange.near)
+      / (gl_DepthRange.far - gl_DepthRange.near), 0, 1);
+   float c = mode ? c1 : c2;
    color = vec3(c,c,c);
 }

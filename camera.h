@@ -9,6 +9,8 @@ struct camera {
    glm::mat4 mvp() const { return _mvp; }
    GLfloat far() const { return _far; }
    GLfloat near() const { return _near; }
+   // A terrible hack to get keyboard events into model
+   GLboolean mode() const { return _mode; }
    void sendMVP(GLuint mvp_id) const;
    void update_matrices();
    void mouseButtonCallback(int button, int action, int mods);
@@ -35,4 +37,5 @@ private:
    double _mouse_x;
    double _mouse_y;
    float _distance;
+   GLboolean _mode;
 };

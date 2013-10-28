@@ -29,7 +29,7 @@ void camera::init(GLFWwindow* window) {
 
 camera::camera(GLFWwindow* window): _window(window), _fov(45), _near(1.0),
       _far(30.0), _direction(1,0,0), _right(0,1,0), _distance(10),
-      _rotation_mode(false) {
+      _rotation_mode(false), _mode(false) {
    int w, h;
    glfwGetWindowSize(window, &w, &h);
    _width = w;
@@ -73,6 +73,8 @@ void camera::keyCallback(int key, int scancode, int action, int mods) {
       zoomIn();
    else if(key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
       zoomOut();
+   else if(key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+      _mode = !_mode;
 }
 
 std::ostream& operator <<(std::ostream& ost, glm::vec3 const& vec) {
