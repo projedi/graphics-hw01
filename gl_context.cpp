@@ -19,12 +19,11 @@ gl_context::gl_context(int width, int height) {
 gl_context::~gl_context() {
    glfwDestroyWindow(_main_window);
    glfwTerminate();
-   glDeleteProgram(_shader_id);
    glDeleteVertexArrays(1, &_vertex_array_id);
 }
 
-void gl_context::set_shader(std::string const& vertex_file_path,
-                std::string const& fragment_file_path) {
+GLuint gl_context::add_shader(std::string const& vertex_file_path,
+                std::string const& fragment_file_path) const {
    GLuint vertex_id = glCreateShader(GL_VERTEX_SHADER);
    GLuint fragment_id = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -33,16 +32,16 @@ void gl_context::set_shader(std::string const& vertex_file_path,
 
    // Link the program
    std::cout << "Linking program" << std::endl;
-   _shader_id = glCreateProgram();
-   glAttachShader(_shader_id, vertex_id);
-   glAttachShader(_shader_id, fragment_id);
-   glLinkProgram(_shader_id);
+   GLuint shader_id = glCreateProgram();
+   glAttachShader(shader_id, vertex_id);
+   glAttachShader(shader_id, fragment_id);
+   glLinkProgram(shader_id);
 
    // Check the program
    GLint result = GL_FALSE;
    int info_log_length;
-   glGetProgramiv(_shader_id, GL_LINK_STATUS, &result);
-   glGetProgramiv(_shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
+   glGetProgramiv(shader_id, GL_LINK_STATUS, &result);
+   glGetProgramiv(shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
    if(info_log_length > 0) {
       std::string err_message;
       err_message.resize(info_log_length + 1);
@@ -52,9 +51,11 @@ void gl_context::set_shader(std::string const& vertex_file_path,
 
    glDeleteShader(vertex_id);
    glDeleteShader(fragment_id);
+
+   return shader_id;
 }
 
-void gl_context::init_glfw() {
+void gl_context::init_glfw() const {
    glfwSetErrorCallback([](int code, const char* msg) {
          std::cerr << "GLFW Error: " << msg << std::endl;
    });
@@ -74,15 +75,15 @@ void gl_context::create_glfw_window(int width, int height) {
    }
 }
 
-void gl_context::init_glew() {
+void gl_context::init_glew() const {
    glewExperimental = GL_TRUE;
-   GLenum err;
-   if(err = glewInit())
+   GLenum err = glewInit();
+   if(err)
       throw std::runtime_error("Failed to initialize GLEW: " +
             std::string((char*)glewGetErrorString(err)));
 }
 
-int gl_context::compile_shader(std::string const& shader_path, GLuint shader_id) {
+int gl_context::compile_shader(std::string const& shader_path, GLuint shader_id) const {
    std::string code;
    std::ifstream file(shader_path.c_str(), std::ios::in | std::ios::binary);
    if(!file) {
@@ -111,7 +112,7 @@ int gl_context::compile_shader(std::string const& shader_path, GLuint shader_id)
    return 0;
 }
 
-void gl_context::main_loop(std::function<void()> body) {
+void gl_context::main_loop(std::function<void()> body) const {
    do {
       body();
 
@@ -121,6 +122,10 @@ void gl_context::main_loop(std::function<void()> body) {
           && !glfwWindowShouldClose(_main_window));
 }
 
-void gl_context::use_shader() {
-   glUseProgram(get_shader());
+void gl_context::use_shader(GLuint shader_id) const {
+   glUseProgram(shader_id);
+}
+
+void gl_context::remove_shader(GLuint shader_id) const {
+   glDeleteProgram(shader_id);
 }

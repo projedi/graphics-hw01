@@ -1,4 +1,6 @@
 #include "model.h"
+#include "gl_context.h"
+#include "camera.h"
 
 	static const GLfloat g_vertex_buffer_data[] = { 
 		-1.0f,-1.0f,-1.0f,
@@ -77,7 +79,8 @@
 		0.982f,  0.099f,  0.879f
 	};
 
-model::model() {
+model::model(camera const& camera, gl_context const& context):
+   _context(context), _camera(camera) {
    glGenBuffers(1, &_vertexbuffer);
    glBindBuffer(GL_ARRAY_BUFFER, _vertexbuffer);
    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
@@ -109,6 +112,8 @@ model::model() {
       0,                                // stride
       (void*)0                          // array buffer offset
    );
+   _depth_shader_id = _context.add_shader("depthcolor.vert", "depthcolor.frag");
+   _wire_shader_id = _context.add_shader("wirecolor.vert", "wirecolor.frag");
 }
 
 model::~model() {
@@ -117,8 +122,23 @@ model::~model() {
 
    glDeleteBuffers(1, &_vertexbuffer);
    glDeleteBuffers(1, &_colorbuffer);
+
+   _context.remove_shader(_depth_shader_id);
+   _context.remove_shader(_wire_shader_id);
 }
 
 void model::draw() {
+   // Tried glPolygonOffset. No effect whatsoever.
+   // TODO: Try again.
+
+   _context.use_shader(_depth_shader_id);
+   _camera.sendMVP(glGetUniformLocation(_depth_shader_id, "MVP"));
+   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
+   glPolygonOffset(1, 1);
    glDrawArrays(GL_TRIANGLES, 0, 12*3); // 12*3 indices starting at 0 -> 12 triangles
+
+   _context.use_shader(_wire_shader_id);
+   _camera.sendMVP(glGetUniformLocation(_wire_shader_id, "MVP"));
+   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE);
+   glDrawArrays(GL_TRIANGLES, 0, 12*3);
 }

@@ -1,4 +1,4 @@
-CXX=g++
+CXX=clang++
 CFLAGS=-g -std=c++11
 #CFLAGS=-O2 -std=c++11
 
