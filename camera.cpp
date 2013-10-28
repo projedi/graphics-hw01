@@ -7,26 +7,29 @@
 
 #include "camera.h"
 
-// TODO: Make it a singleton
-static camera* INSTANCE;
+camera* camera::INSTANCE;
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-   INSTANCE->mouseButtonCallback(button, action, mods);
+   camera::instance()->mouseButtonCallback(button, action, mods);
 }
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-   INSTANCE->scrollCallback(xoffset, yoffset);
+   camera::instance()->scrollCallback(xoffset, yoffset);
 }
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-   INSTANCE->keyCallback(key, scancode, action, mods);
+   camera::instance()->keyCallback(key, scancode, action, mods);
 }
 void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
-   INSTANCE->cursorPosCallback(xpos, ypos);
+   camera::instance()->cursorPosCallback(xpos, ypos);
 }
 
-camera::camera(GLFWwindow* window): _window(window), _fov(45), _near(0.1),
-      _far(100.0), _horizontal_angle(0), _vertical_angle(0),
-      _position(glm::vec3(4,0,0)), _model(1.0), _rotation_mode(false), _up(glm::vec3(0,0,1)) {
-   INSTANCE = this;
+void camera::init(GLFWwindow* window) {
+   if(INSTANCE) return;
+   INSTANCE = new camera(window);
+}
+
+camera::camera(GLFWwindow* window): _window(window), _fov(45), _near(1.0),
+      _far(30.0), _horizontal_angle(0), _vertical_angle(0.1), _distance(10),
+      _rotation_mode(false) {
    int w, h;
    glfwGetWindowSize(window, &w, &h);
    _width = w;
@@ -39,9 +42,18 @@ camera::camera(GLFWwindow* window): _window(window), _fov(45), _near(0.1),
 }
 
 void camera::update_matrices() {
-   _projection = glm::perspectiveFov(_fov, _width, _height, _near, _far);
-   _view = glm::lookAt(_position, glm::vec3(0,0,0), _up);
-   _mvp = _projection * _view * _model;
+   //glm::vec3 position(1,0,0);
+   //position = glm::rotateZ(glm::rotateY(position, _vertical_angle), _horizontal_angle);
+   //position *= _distance;
+   glm::vec3 position( _distance * glm::cos(_horizontal_angle) * glm::sin(_vertical_angle)
+                     , _distance * glm::sin(_horizontal_angle) * glm::sin(_vertical_angle)
+                     , _distance * glm::cos(_vertical_angle));
+   glm::vec3 right = glm::normalize(glm::vec3(-position.y, position.x, 0));
+   glm::vec3 up = glm::cross(right, position);
+   glm::mat4 projection = glm::perspectiveFov(_fov, _width, _height, _near, _far);
+   glm::mat4 view = glm::lookAt(position, glm::vec3(0,0,0), up);
+   glm::mat4 model(1.0);
+   _mvp = projection * view * model;
 }
 
 void camera::sendMVP(GLuint mvp_id) const {
@@ -78,29 +90,31 @@ void camera::cursorPosCallback(double xpos, double ypos) {
    double dx = xpos - _mouse_x;
    double dy = ypos - _mouse_y;
    _horizontal_angle += dx / 180 * 3.14;
-   _horizontal_angle = glm::mod(_horizontal_angle, 6.28);
+   _horizontal_angle = glm::mod(_horizontal_angle, 6.28f);
    _vertical_angle += dy / 180 * 3.14;
-   _vertical_angle = glm::clamp(_vertical_angle, -1.56, 1.56); // almost pi/2
+   _vertical_angle = glm::clamp(_vertical_angle, 0.1f, 3.13f);
    // TODO: Issues when angle is at its bounds.
-   //std::cerr << std::endl << "ROTATING to "
-             //<< _horizontal_angle << " " << _vertical_angle
-             //<< std::endl;
+   std::cerr << std::endl << "ROTATING to "
+             << _horizontal_angle << " " << _vertical_angle
+             << std::endl;
    //std::cerr << "position is " << _position << std::endl;;
-   glm::vec3 right = glm::vec3(-_position.y, _position.x, 0);
-   right = glm::normalize(right);
+   //glm::vec3 right = glm::vec3(-_position.y, _position.x, 0);
+   //right = glm::normalize(right);
    //std::cerr << "right is " << right << std::endl;
-   _up = glm::cross(right, _position);
+   //_up = glm::cross(right, _position);
    //std::cerr << "up is " << _up << std::endl;
-   _position = glm::rotate(_position, -(float)dx, _up);
-   _position = glm::rotate(_position, (float)dy, right);
+   //_position = glm::rotate(_position, -(float)dx, _up);
+   //_position = glm::rotate(_position, (float)dy, right);
    _mouse_x = xpos;
    _mouse_y = ypos;
 }
 
 void camera::zoomIn() {
-   _position -= glm::normalize(_position);
+   _distance = glm::max(_distance - 1, 0.1f);
+   //_position -= glm::normalize(_position);
 }
 
 void camera::zoomOut() {
-   _position += glm::normalize(_position);
+   _distance = glm::min(_distance + 1, 1000.0f);
+   //_position += glm::normalize(_position);
 }

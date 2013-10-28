@@ -11,16 +11,16 @@
 
 int main() {
    gl_context context(800, 600);
-   camera camera(context.main_window());
-   model model(camera, context);
+   camera::init(context.main_window());
+   model model(context);
 
    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
    glEnable(GL_DEPTH_TEST);
-   glDepthFunc(GL_LESS);
+   glDepthFunc(GL_LEQUAL);
 
    context.main_loop([&]() {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      camera.update_matrices();
+      camera::instance()->update_matrices();
       model.draw();
    });
 

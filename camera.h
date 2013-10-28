@@ -4,8 +4,11 @@
 struct GLFWwindow;
 
 struct camera {
-   camera(GLFWwindow* window);
+   static void init(GLFWwindow* window);
+   static camera* instance() { return INSTANCE; }
    glm::mat4 mvp() const { return _mvp; }
+   GLfloat far() const { return _far; }
+   GLfloat near() const { return _near; }
    void sendMVP(GLuint mvp_id) const;
    void update_matrices();
    void mouseButtonCallback(int button, int action, int mods);
@@ -16,6 +19,9 @@ private:
    void zoomOut();
    void zoomIn();
 private:
+   camera(GLFWwindow* window);
+   ~camera();
+   static camera* INSTANCE;
    GLFWwindow* _window;
    bool _rotation_mode;
    GLfloat _fov;
@@ -23,14 +29,15 @@ private:
    GLfloat _height;
    GLfloat _near;
    GLfloat _far;
-   glm::vec3 _position;
-   glm::vec3 _up;
-   glm::mat4 _projection;
-   glm::mat4 _view;
-   glm::mat4 _model;
+   //glm::vec3 _position;
+   //glm::vec3 _up;
+   //glm::mat4 _projection;
+   //glm::mat4 _view;
+   //glm::mat4 _model;
    glm::mat4 _mvp;
    double _mouse_x;
    double _mouse_y;
-   double _horizontal_angle;
-   double _vertical_angle;
+   float _horizontal_angle;
+   float _vertical_angle;
+   float _distance;
 };
