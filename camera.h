@@ -29,15 +29,10 @@ private:
    GLfloat _height;
    GLfloat _near;
    GLfloat _far;
-   //glm::vec3 _position;
-   //glm::vec3 _up;
-   //glm::mat4 _projection;
-   //glm::mat4 _view;
-   //glm::mat4 _model;
+   glm::vec3 _direction;
+   glm::vec3 _right;
    glm::mat4 _mvp;
    double _mouse_x;
    double _mouse_y;
-   float _horizontal_angle;
-   float _vertical_angle;
    float _distance;
 };

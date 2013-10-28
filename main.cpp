@@ -1,10 +1,3 @@
-//#include <iostream>
-//#include <stdexcept>
-
-//#include <GL/glew.h>
-//#include <glm/glm.hpp>
-//#include <glm/gtc/matrix_transform.hpp>
-
 #include "gl_context.h"
 #include "camera.h"
 #include "model.h"
