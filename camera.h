@@ -12,6 +12,8 @@ struct camera {
    // A terrible hack to get keyboard events into model
    GLboolean mode() const { return _mode; }
    void sendMVP(GLuint mvp_id) const;
+   void sendMV(GLuint mvp_id) const;
+   void sendP(GLuint mvp_id) const;
    void update_matrices();
    void mouseButtonCallback(int button, int action, int mods);
    void scrollCallback(double xoffset, double yoffset);
@@ -34,6 +36,8 @@ private:
    glm::vec3 _direction;
    glm::vec3 _right;
    glm::mat4 _mvp;
+   glm::mat4 _mv;
+   glm::mat4 _p;
    double _mouse_x;
    double _mouse_y;
    float _distance;

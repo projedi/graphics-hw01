@@ -47,11 +47,21 @@ void camera::update_matrices() {
    glm::mat4 projection = glm::perspectiveFov(_fov, _width, _height, _near, _far);
    glm::mat4 view = glm::lookAt(position, glm::vec3(0,0,0), up);
    glm::mat4 model(1.0);
-   _mvp = projection * view * model;
+   _mv = view * model;
+   _p = projection;
+   _mvp = _p * _mv;
 }
 
 void camera::sendMVP(GLuint mvp_id) const {
    glUniformMatrix4fv(mvp_id, 1, GL_FALSE, &_mvp[0][0]);
+}
+
+void camera::sendMV(GLuint mv_id) const {
+   glUniformMatrix4fv(mv_id, 1, GL_FALSE, &_mv[0][0]);
+}
+
+void camera::sendP(GLuint p_id) const {
+   glUniformMatrix4fv(p_id, 1, GL_FALSE, &_p[0][0]);
 }
 
 void camera::mouseButtonCallback(int button, int action, int mods) {

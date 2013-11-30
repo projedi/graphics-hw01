@@ -84,7 +84,8 @@ void model::draw() {
 
    camera const* cmr = camera::instance();
    _context.use_shader(_depth_shader_id);
-   cmr->sendMVP(glGetUniformLocation(_depth_shader_id, "MVP"));
+   cmr->sendMV(glGetUniformLocation(_depth_shader_id, "MV"));
+   cmr->sendP(glGetUniformLocation(_depth_shader_id, "P"));
    glUniform1f(glGetUniformLocation(_depth_shader_id, "near"), cmr->near());
    glUniform1f(glGetUniformLocation(_depth_shader_id, "far"), cmr->far());
    glUniform1f(glGetUniformLocation(_depth_shader_id, "mode"), cmr->mode());
