@@ -88,9 +88,11 @@ void model::draw() {
    glUniform1f(glGetUniformLocation(_depth_shader_id, "near"), cmr->near());
    glUniform1f(glGetUniformLocation(_depth_shader_id, "far"), cmr->far());
    glUniform1f(glGetUniformLocation(_depth_shader_id, "mode"), cmr->mode());
-   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL);
+   glEnable(GL_POLYGON_OFFSET_FILL);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
    glPolygonOffset(1, 1);
    glDrawArrays(GL_TRIANGLES, 0, _vertex_count);
+   glDisable(GL_POLYGON_OFFSET_FILL);
 
    _context.use_shader(_wire_shader_id);
    camera::instance()->sendMVP(glGetUniformLocation(_wire_shader_id, "MVP"));
